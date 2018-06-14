@@ -211,7 +211,7 @@ def decode_netout2(netout, anchors, obj_thresh, net_h, net_w):
             boxes.append(box)
 
     return boxes
-def decode_netout(netout_origin, anchors, obj_thresh, net_h, net_w):
+def decode_netout(netout_origin, anchors, obj_thresh, net_h, net_w, yolo_num = None):
     netout=deepcopy(netout_origin)
     grid_h, grid_w = netout.shape[:2]
     nb_box = 3
@@ -245,7 +245,7 @@ def decode_netout(netout_origin, anchors, obj_thresh, net_h, net_w):
             # last elements are class probabilities
             classes = netout[row,col,b,5:]
             
-            box = BoundBox(x-w/2, y-h/2, x+w/2, y+h/2, objectness, classes,i,b)
+            box = BoundBox(x-w/2, y-h/2, x+w/2, y+h/2, objectness, classes,row,col,b,yolo_num)
 
             boxes.append(box)
 

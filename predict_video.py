@@ -37,13 +37,13 @@ else :
     seq_infer_model.load_weights('Weights/yolov3.h5', by_name=True)
 
 
-imgs_folder_path = 'Z:/dataset/KNU-Campus Dataset/images/20180312_171706/'
-img_name = '20180312_171706_'
+imgs_folder_path = 'Z:/dataset/KNU-Campus Dataset/images/20180312_172240/'
+img_name = '20180312_172240_'
 
 prev_feature=[]
 
 isFirst=True
-for img_num in range(20):
+for img_num in range(50):
     img_num=str(img_num)
     while(len(img_num)<4):
         img_num='0'+img_num
@@ -82,5 +82,6 @@ for img_num in range(20):
     # draw bounding boxes on the image using labels
     draw_boxes(img, boxes, labels, obj_thresh)
 
+    cv2.imwrite('outputs/'+img_name+img_num+'_seq_detected.jpg',cv2.resize(img,(1280,720)))
     cv2.imshow('video with bboxes', cv2.resize(img,(1280,720)))
-    cv2.waitKey(0)
+    cv2.waitKey(9)

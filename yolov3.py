@@ -227,8 +227,11 @@ def _conv_block(inp, convs, do_skip=True):
 
     return add([skip_connection, x]) if do_skip else x
 
-def make_yolov3_model():
-    input_image = Input(shape=(None, None, 3))
+def make_yolov3_model(input_shape=None):
+    if input_shape==None:
+        input_image = Input(shape=(None, None, 3))
+    else:
+        input_image = Input(shape=input_shape)
     # Layer  0 => 4
     x = _conv_block(input_image,
                     [{'filter': 32, 'kernel': 3, 'stride': 1, 'bnorm': True, 'leaky': True, 'layer_idx': 0},
@@ -339,8 +342,11 @@ def make_yolov3_model():
     return model
 
 
-def make_seq_yolov3_model():
-    input_image = Input(shape=(None, None, 3))
+def make_seq_yolov3_model(input_shape=None):
+    if input_shape==None:
+        input_image = Input(shape=(None, None, 3))
+    else:
+        input_image = Input(shape=input_shape)
     prev_feature_map1 = Input(shape = (None, None, 512))
     prev_feature_map2 = Input(shape = (None, None, 256))
     prev_feature_map3 = Input(shape = (None, None, 384))
@@ -413,7 +419,7 @@ def make_seq_yolov3_model():
     yolo_82 = _conv_block(x, [{'filter': 1024, 'kernel': 3, 'stride': 1, 'bnorm': True, 'leaky': True, 'layer_idx': 80},
                               {'filter': 255, 'kernel': 1, 'stride': 1, 'bnorm': False, 'leaky': False,
                                'layer_idx': 81}], do_skip=False)
-    seq_yolo_82 = _conv_block(x, [{'filter': 1024, 'kernel': 3, 'stride': 1, 'bnorm': True, 'leaky': True, 'layer_idx': 80},
+    seq_yolo_82 = _conv_block(seq_x, [{'filter': 1024, 'kernel': 3, 'stride': 1, 'bnorm': True, 'leaky': True, 'layer_idx': 80},
                               {'filter': 255, 'kernel': 1, 'stride': 1, 'bnorm': False, 'leaky': False,
                                'layer_idx': 81}], do_skip=False)
 
@@ -482,7 +488,7 @@ def make_seq_yolov3_model():
 
 
     model = Model([input_image], [yolo_82, yolo_94, yolo_106, feature_map1, feature_map2, feature_map3])
-    seq_model=Model([input_image, prev_feature_map1, prev_feature_map2, prev_feature_map3], [seq_yolo_82, yolo_94, yolo_106, seq_feature_map1, seq_feature_map2, seq_feature_map3])
+    seq_model=Model([input_image, prev_feature_map1, prev_feature_map2, prev_feature_map3], [seq_yolo_82, seq_yolo_94, seq_yolo_106, seq_feature_map1, seq_feature_map2, seq_feature_map3])
     return model,seq_model
 
 def dummy_loss(y_true, y_pred):

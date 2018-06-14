@@ -106,3 +106,4 @@ ENV/
 *.weights
 *.h5
 *.pkl
+*.avi

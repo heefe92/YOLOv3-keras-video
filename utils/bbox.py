@@ -4,7 +4,7 @@ import cv2
 from .colors import get_color
 
 class BoundBox:
-    def __init__(self, xmin, ymin, xmax, ymax, c = None, classes = None, i = None, b = None):
+    def __init__(self, xmin, ymin, xmax, ymax, c = None, classes = None, row = None, col = None , b = None, yolo_num = None):
         self.xmin = xmin
         self.ymin = ymin
         self.xmax = xmax
@@ -13,8 +13,11 @@ class BoundBox:
         self.c       = c
         self.classes = classes
 
-        self.i = i
+        self.row = row
+        self.col = col
+        self.yolo_num = yolo_num
         self.b = b
+        self.debug = False if (b == None) else True
         self.label = -1
         self.score = -1
 
@@ -32,8 +35,8 @@ class BoundBox:
 
     def __repr__(self):
         return '[xmin = ' + str(self.xmin) + ',ymin = ' + str(self.ymin) + ',xmax = ' + str(self.xmax) + ',ymax = ' + \
-               str(self.ymax) + ',c = ' + str(self.c) + ',classes = ' + str(self.get_label())+',i = ' + str(self.i)+\
-               ',b = ' + str(self.b)+']'
+               str(self.ymax) + ',c = ' + str(self.c) + ',classes = ' + str(self.get_label())+',row = ' + str(self.row)+\
+               ',col = ' + str(self.col)+',b = ' + str(self.b)+',yolo_num = ' + str(self.yolo_num)+']'
 
 def _interval_overlap(interval_a, interval_b):
     x1, x2 = interval_a
@@ -63,7 +66,12 @@ def bbox_iou(box1, box2):
     
     return float(intersect) / union
 
-def draw_boxes(image, boxes, labels, obj_thresh, quiet=True):
+def draw_boxes(image, boxes, labels, obj_thresh, quiet=True, debug = False):
+    rows=[]
+    cols=[]
+    bs=[]
+    class_nums=[]
+    yolo_nums=[]
     for box in boxes:
         label_str = ''
         label = -1
@@ -81,8 +89,14 @@ def draw_boxes(image, boxes, labels, obj_thresh, quiet=True):
             region = np.array([[box.xmin-3,        box.ymin], 
                                [box.xmin-3,        box.ymin-height-26], 
                                [box.xmin+width+13, box.ymin-height-26], 
-                               [box.xmin+width+13, box.ymin]], dtype='int32')  
-            print(box)
+                               [box.xmin+width+13, box.ymin]], dtype='int32')
+            rows.append(box.row)
+            cols.append(box.col)
+            bs.append(box.b)
+            class_nums.append(np.argmax(box.classes))
+            yolo_nums.append(box.yolo_num)
+            if debug:
+                print(box)
             cv2.rectangle(img=image, pt1=(box.xmin,box.ymin), pt2=(box.xmax,box.ymax), color=get_color(label), thickness=5)
             cv2.fillPoly(img=image, pts=[region], color=get_color(label))
             cv2.putText(img=image, 
@@ -92,5 +106,5 @@ def draw_boxes(image, boxes, labels, obj_thresh, quiet=True):
                         fontScale=1e-3 * image.shape[0], 
                         color=(0,0,0), 
                         thickness=2)
-        
-    return image          
+    return rows,cols,bs,class_nums,yolo_nums
+    #return image
